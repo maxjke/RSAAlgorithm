@@ -1,0 +1,7 @@
+C:\Users\Maksim\source\repos\RsaAlgorithm\bin\Debug\RsaAlgorithm.exe.config
+C:\Users\Maksim\source\repos\RsaAlgorithm\bin\Debug\RsaAlgorithm.exe
+C:\Users\Maksim\source\repos\RsaAlgorithm\bin\Debug\RsaAlgorithm.pdb
+C:\Users\Maksim\source\repos\RsaAlgorithm\obj\Debug\RsaAlgorithm.csproj.AssemblyReference.cache
+C:\Users\Maksim\source\repos\RsaAlgorithm\obj\Debug\RsaAlgorithm.csproj.CoreCompileInputs.cache
+C:\Users\Maksim\source\repos\RsaAlgorithm\obj\Debug\RsaAlgorithm.exe
+C:\Users\Maksim\source\repos\RsaAlgorithm\obj\Debug\RsaAlgorithm.pdb
