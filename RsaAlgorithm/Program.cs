@@ -8,7 +8,6 @@ class RSA
 {
     public static void Main(string[] args)
     {
-       
         Console.WriteLine("Įveskite p: ");
         BigInteger p = BigInteger.Parse(Console.ReadLine());
         Console.WriteLine("Įveskite q: ");
@@ -24,8 +23,7 @@ class RSA
         Console.WriteLine($"Viešasis raktas (e, n): ({e}, {n})");
         Console.WriteLine($"Privatus raktas (d, n): ({d}, {n})");
 
-        
-        byte[] textBytes = Encoding.ASCII.GetBytes(text);
+        byte[] textBytes = Encoding.UTF8.GetBytes(text);
         BigInteger[] encryptedText = new BigInteger[textBytes.Length];
         for (int i = 0; i < textBytes.Length; i++)
         {
@@ -33,20 +31,14 @@ class RSA
         }
         Console.WriteLine("Užšifruotas tekstas: " + string.Join(" ", encryptedText));
 
-        
         SaveToFile(encryptedText, "encryptedText.txt");
         Console.WriteLine("Užšifruotas tekstas išsaugotas.");
 
-        SaveKeyToFile(e,d,n, "keys.txt");
-       
-
+        SaveKeyToFile(e, d, n, "keys.txt");
         Console.WriteLine("Raktai išsaugoti.");
 
-        
         BigInteger[] encryptedTextFromFile = LoadFromFile("encryptedText.txt");
-
-       
-        string decryptedText = DecryptText(encryptedTextFromFile, d, n);
+        string decryptedText = DecryptText(encryptedTextFromFile, e, n);
         Console.WriteLine($"Dešifruotas tekstas: {decryptedText}");
 
         Console.ReadKey();
@@ -57,8 +49,13 @@ class RSA
         return BigInteger.ModPow(message, e, n);
     }
 
-    private static string DecryptText(BigInteger[] encryptedText, BigInteger d, BigInteger n)
+    private static string DecryptText(BigInteger[] encryptedText, BigInteger e, BigInteger n)
     {
+        
+        var (p, q) = Factorize(n);
+        BigInteger phi = (p - 1) * (q - 1);
+        BigInteger d = CalculateD(e, phi);
+
         StringBuilder builder = new StringBuilder();
         foreach (var item in encryptedText)
         {
@@ -70,27 +67,15 @@ class RSA
 
     private static BigInteger Decrypt(BigInteger encryptedMessage, BigInteger d, BigInteger n)
     {
-        BigInteger result = 1;
-        while (d > 0)
-        {
-            if (d % 2 == 1)
-            {
-                result = (result * encryptedMessage) % n;
-            }
-            encryptedMessage = (encryptedMessage * encryptedMessage) % n;
-            d /= 2;
-        }
-        return result;
+        return BigInteger.ModPow(encryptedMessage, d, n);
     }
-
 
     private static BigInteger CalculateD(BigInteger e, BigInteger phi)
     {
-        BigInteger d = 0;
-        while ((d * e) % phi != 1)
-        {
-            d++;
-        }
+        BigInteger x, y;
+        ExtendedEuclid(e, phi, out x, out y);
+        BigInteger d = x;
+        if (d < 0) d += phi; 
         return d;
     }
 
@@ -99,14 +84,12 @@ class RSA
     {
         if (a == 0)
         {
-            x = 0;
-            y = 1;
+            x = 0; y = 1;
             return b;
         }
 
         BigInteger x1, y1;
         BigInteger gcd = ExtendedEuclid(b % a, a, out x1, out y1);
-
         x = y1 - (b / a) * x1;
         y = x1;
         return gcd;
@@ -127,14 +110,11 @@ class RSA
     {
         using (StreamWriter writer = new StreamWriter(filename))
         {
-         
-            writer.WriteLine(e);
-            writer.WriteLine(n);
-            writer.WriteLine(d);
-            writer.WriteLine(n);
+            writer.WriteLine($"Viešasis raktas: (e={e}, n={n})");
+            writer.WriteLine($"Privatus raktas: (d={d}, n={n})");
         }
-        
     }
+
     private static BigInteger[] LoadFromFile(string filename)
     {
         List<BigInteger> encryptedList = new List<BigInteger>();
@@ -147,5 +127,23 @@ class RSA
             }
         }
         return encryptedList.ToArray();
+    }
+
+    private static (BigInteger, BigInteger) Factorize(BigInteger n)
+    {
+        BigInteger p, q;
+
+        for (p = 2; p < n; p++)
+        {
+            if (n % p == 0) 
+            {
+                q = n / p;
+                
+                return (p, q);
+                
+            }
+        }
+
+        return (0, 0);
     }
 }
